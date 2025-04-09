@@ -24,6 +24,8 @@ env:
 
 jobs:
   dispatch_only_job:
+    permissions:
+      contents: write
     name: Dispatch Only Job
     runs-on: ubuntu-latest
     # Run this job only when the workflow is triggered manually (workflow_dispatch)
