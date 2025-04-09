@@ -17,16 +17,33 @@ on:
       - '.github/RELEASE.md'
       - 'docs'
   workflow_dispatch:
-    inputs:
-      tag:
-        description: 'Tag to use for this release (e.g., v1.0.0)'
-        required: true
-        default: 'v1.0.0'
+    
 
 env:
   image_name: reverser69/kafl
 
 jobs:
+  dispatch_only_job:
+    name: Dispatch Only Job
+    runs-on: ubuntu-latest
+    # Run this job only when the workflow is triggered manually (workflow_dispatch)
+    if: github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Checkout public repository
+        uses: actions/checkout@v2
+        with:
+          repository: reverser69/kAFL
+          path: kAFL
+      - name: Get tag name from ref
+        shell: bash
+        run: echo "{tag}={${GITHUB_REF#refs/tags/}}" >> $GITHUB_OUTPUT
+        id: get_tag
+      - name: Create tag in public repository
+        run: |
+          cd ${{github.workspace}}/kAFL
+          git tag ${{ steps.get_tag.outputs.tag }}
+          git push --tags --porcelain
+      
   ansible-lint:
     runs-on: ubuntu-20.04
     steps:
@@ -301,7 +318,8 @@ jobs:
         id: create_release
         uses: softprops/action-gh-release@v2.2.1
         with:
-          tag_name: ${{ steps.get_version.outputs.version }}
+          #tag_name: ${{ steps.get_version.outputs.version }}
+          tag_name: 'v1.0.0'
           generate_release_notes: true
         #if: startsWith(github.ref, 'refs/tags/v')
 
