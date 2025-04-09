@@ -320,7 +320,7 @@ jobs:
       
       - name: Package everything from the root directory
         run: |
-          tar -czf distr.tar.gz -C $GITHUB_WORKSPACE . --gzip --fast --no-same-owner --file=package.tar.gz
+          env GZIP=-9 tar -czf /tmp/distr.tar.gz . 
       
       - name: Release with Const Tag
         id: create_release_constTag
@@ -328,7 +328,7 @@ jobs:
         with:
           tag_name: ${{ inputs.tag }}
           # upload package
-          files: distr.tar.gz
+          files: ./tmp/distr.tar.gz
           generate_release_notes: true
         if: github.event_name == 'workflow_dispatch'
 
