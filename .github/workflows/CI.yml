@@ -17,6 +17,10 @@ on:
       - '.github/RELEASE.md'
       - 'docs'
   workflow_dispatch:
+    inputs:
+      tag:
+        description: 'v0.0.1'
+        required: true
     
 
 env:
@@ -32,22 +36,18 @@ jobs:
     if: github.event_name == 'workflow_dispatch'
     steps:
       - name: Checkout public repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: reverser69/kAFL
           path: kAFL
-      - name: Get tag name from ref
-        shell: bash
-        run: echo "{tag}={${GITHUB_REF#refs/tags/}}" >> $GITHUB_OUTPUT
-        id: get_tag
       - name: Create tag in public repository
         run: |
-          cd ${{github.workspace}}/kAFL
-          git tag ${{ steps.get_tag.outputs.tag }}
-          git push --tags --porcelain
-      - name: print Tag
+          cd ${{ github.workspace }}/kAFL
+          git tag ${{ inputs.tag }}
+          git push origin ${{ inputs.tag }}
+      - name: Print Tag
         run: |
-          echo "The tag is: ${{ steps.get_tag.outputs.tag }}"
+          echo "The tag is: ${{ inputs.tag }}"
       
   ansible-lint:
     runs-on: ubuntu-20.04
@@ -318,6 +318,15 @@ jobs:
         id: get_version
         run: echo "version=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_OUTPUT
 
+      - name: Release with Const Tag
+        id: create_release_constTag
+        uses: softprops/action-gh-release@v2.2.1
+        with:
+          tag_name: ${{ inputs.tag }}
+          generate_release_notes: true
+        if: github.event_name == 'workflow_dispatch'
+        
+        
       # only create release if tag start by 'v*'
       - name: Create a Release
         id: create_release
@@ -327,6 +336,7 @@ jobs:
           tag_name: ${{ steps.get_tag.outputs.tag }}
           generate_release_notes: true
         #if: startsWith(github.ref, 'refs/tags/v')
+        if: github.event_name != 'workflow_dispatch'
 
       - id: step_upload_url
         run: echo "upload_url=${{ steps.create_release.outputs.upload_url }}" >> $GITHUB_OUTPUT
