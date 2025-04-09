@@ -317,16 +317,21 @@ jobs:
       - name: Get the version
         id: get_version
         run: echo "version=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_OUTPUT
-
+      
+      - name: Package everything from the root directory
+        run: |
+          tar -czf distr.tar.gz -C $GITHUB_WORKSPACE . --gzip --fast --no-same-owner --file=package.tar.gz
+      
       - name: Release with Const Tag
         id: create_release_constTag
         uses: softprops/action-gh-release@v2.2.1
         with:
           tag_name: ${{ inputs.tag }}
+          # upload package
+          files: distr.tar.gz
           generate_release_notes: true
         if: github.event_name == 'workflow_dispatch'
-        
-        
+
       # only create release if tag start by 'v*'
       - name: Create a Release
         id: create_release
@@ -337,43 +342,6 @@ jobs:
           generate_release_notes: true
         #if: startsWith(github.ref, 'refs/tags/v')
         if: github.event_name != 'workflow_dispatch'
-        
-  bin_release:
-    permissions:
-      # required for releases
-      contents: write
-    runs-on: ubuntu-latest
-    
-    steps:
-      # Step 1: Checkout the repository
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        
-      # Step 2: Package everything from the root directory with maximum compression
-      - name: Package everything from the root directory
-        run: |
-          tar -czf package.tar.gz -C $GITHUB_WORKSPACE . --gzip --fast --no-same-owner --file=package.tar.gz
-          
-      # Step 3: Create a new release (optional if not already created)
-      - name: Create release
-        id: create_release
-        uses: gh actions/create-release@v2
-        with:
-          tag_name: bin Release
-          release_name: bin Release
-          body: 'Automated release upload'
-          draft: false
-          prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          
-      # Step 4: Upload the packaged file to the release
-      - name: Upload release assets
-        uses: softprops/action-gh-release@v2
-        with:
-          files: package.tar.gz
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     
       - id: step_upload_url
         run: echo "upload_url=${{ steps.create_release.outputs.upload_url }}" >> $GITHUB_OUTPUT
