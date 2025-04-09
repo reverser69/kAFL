@@ -26,7 +26,7 @@ jobs:
   dispatch_only_job:
     permissions:
       contents: write
-    name: Dispatch Only Job
+    name: Only on Manuall Run
     runs-on: ubuntu-latest
     # Run this job only when the workflow is triggered manually (workflow_dispatch)
     if: github.event_name == 'workflow_dispatch'
@@ -45,6 +45,7 @@ jobs:
           cd ${{github.workspace}}/kAFL
           git tag ${{ steps.get_tag.outputs.tag }}
           git push --tags --porcelain
+          echo ${{ steps.get_tag.outputs.tag }}
       
   ansible-lint:
     runs-on: ubuntu-20.04
