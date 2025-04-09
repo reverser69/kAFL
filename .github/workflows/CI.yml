@@ -19,7 +19,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'v0.0.1'
+        description: 'Enter Tag:'
         required: true
     
 
@@ -30,7 +30,7 @@ jobs:
   dispatch_only_job:
     permissions:
       contents: write
-    name: Only on Manuall Run
+    name: on Dispatch
     runs-on: ubuntu-latest
     # Run this job only when the workflow is triggered manually (workflow_dispatch)
     if: github.event_name == 'workflow_dispatch'
