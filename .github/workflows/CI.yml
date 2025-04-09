@@ -17,9 +17,14 @@ on:
       - '.github/RELEASE.md'
       - 'docs'
   workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to use for this release (e.g., v1.0.0)'
+        required: true
+        default: 'v1.0.0'
 
 env:
-  image_name: intellabs/kafl
+  image_name: reverser69/kafl
 
 jobs:
   ansible-lint:
