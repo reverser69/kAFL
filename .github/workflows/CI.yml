@@ -192,6 +192,22 @@ jobs:
           --skip-tags "hardware_check,kvm_device,update_grub,reboot_kernel"
           --extra-vars "@parameters.json"
 
+      - name: Setup the tooling for win
+        run: > 
+          make deploy --
+          --tags "examples,examples-template-windows"
+
+      - name: verify installation
+        run: | 
+          packer version
+          vagrant version
+          vagrant plugin list
+
+      - name: Build the Windows VM Template
+        run: | 
+          make build
+        working-directory: examples/templates/windows
+
   docker-image:
     runs-on: ubuntu-latest
     steps:
